@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage( 'SCM Checkout' ) {
             steps{
-            git 'https://github.com/uzuazoraro/nodejs-demo.git'    
+            git 'https://github.com/Uzuazoraro/Docker-1.git'    
             }
         }
 
