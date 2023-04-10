@@ -6,27 +6,58 @@ pipeline {
     }
 
     stages {
+        
+        stage('Initial Cleanup') {
+            steps {
+            dir("${WORKSPACE}") {
+              deleteDir()
+                }
+            }
+        }
+
         stage( 'SCM Checkout' ) {
             steps{
-            git 'https://github.com/Uzuazoraro/Docker-1.git'    
+            git branch: 'feature', url: 'https://github.com/Uzuazoraro/Docker-1.git'    
             }
         }
 
         stage( 'Build docker image' ) {
             steps {
-                sh 'docker build -t uzuazoraro/nodeapp:$BUILD_NUMBER .'
+                script {
+                    sh "docker build -t uzuazoraro/node:${BUILD_NUMBER} ."
+                    sh "docker tag node uzuazoraro/node:node:${BUILD_NUMBER} ."
+                }
             }
         }
 
-        stage( 'login to dockerhub' ) {
-            steps{
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+        stage('login to dockerhub') {
+            steps {
+                echo "sh $DOCKERHUB_CREDENYTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+            }
+        }
+
+        stage ('Test-Stage-Curl') {
+            steps {
+                script {
+
+                    sh "curl --version"
+                    sh  "curl -I http://3.23.122.15:8050"
+                }
+            }
+        }
+
+        stage ('Run Container') {
+            steps {
+                script {
+
+                       sh "docker run --network node -p 8050:8000 -d uzuazoraro/node:${BUILD_NUMBER} ."
+                }
             }
         }
 
         stage( 'push image' ) {
             steps{
-                sh 'docker push uzuazoraro/nodeapp:$BUILD_NUMBER'
+                sh 'docker push uzuazoraro/node:${$BUILD_NUMBER} .'
             }
         }
     }

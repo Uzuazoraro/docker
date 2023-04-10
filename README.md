@@ -186,13 +186,13 @@ Launch the container with docker run
 Try to access your application via port exposed from a container
 Let us begin:
 
-Ensure you are inside the directory "tooling" that has the file Dockerfile and build your container :
+## Ensure you are inside the directory "tooling" that has the file Dockerfile and build your container :
 
  $ docker build -t tooling:0.0.1 . 
 In the above command, we specify a parameter -t, so that the image can be tagged tooling"0.0.1 - Also, you have to notice the . at the end. This is important as that tells Docker to locate the Dockerfile in the current directory you are running the command. Otherwise, you would need to specify the absolute path to the Dockerfile.
 
 Run the container:
- $ docker run --network tooling_app_network -p 8085:80 -it tooling:0.0.1 
+ $ `docker run --network tooling_app_network -p 8085:80 -it tooling:0.0.1` 
 
 Let us observe those flags in the command.
 
@@ -253,14 +253,35 @@ Agent docker-server
 `curl -sO http://3.23.122.15:8080/jnlpJars/agent.jar`
 `java -jar agent.jar -jnlpUrl http://3.23.122.15:8080/manage/computer/docker%2Dserver/jenkins-agent.jnlp -secret d494352e7fff6993934bd9377191e170aa33b121f03669ffe46d992feeabe266 -workDir "/home/"`
 
-![Agent from created node](./Agent docker-server.png)
+![Agent from created node](./Agent docker-server.png)add source > chose git > enter the repo url > 
 
 2. Connect your repo to Jenkins
 # Connect with your docker username and docker access token in jenkins global credentials.
 
 3. Create a multi-branch pipeline
-# Copy and paste jenkinsfile in the pipeline script of your Jenkins app > apply and save > build
+Click New item > Type a project name > select multibranch pipeline > select Branch Sources > add source > chose git > enter the repo url > 
+![creating multibranch pipeline](./multibranch pipeline.png)
 
 4. Simulate a CI pipeline from a feature and master branch using previously created Jenkinsfile
+create a feature branch using: git checkout -b feature
+cd ..
 5. Ensure that the tagged images from your Jenkinsfile have a prefix that suggests which branch the image was pushed from. For example,        feature-0.0.1.
 6. Verify that the images pushed from the CI can be found at the registry.
+
+## Deployment with Docker Compose
+
+All we have done until now required quite a lot of effort to create an image and launch an application inside it. We should not have to always run Docker commands on the terminal to get our applications up and running. There are solutions that make it easy to write declarative code in YAML, and get all the applications and dependencies up and running with minimal effort by launching a single command.
+
+In this section, we will refactor the Tooling app POC so that we can leverage the power of Docker Compose.
+
+## First, install Docker Compose on your workstation from here
+## Create a file, name it `tooling.yaml`
+Begin to write the Docker Compose definitions with YAML syntax. The YAML file is used for defining services, networks, and volumes:
+version: "3.9"
+services:
+  tooling_frontend:
+    build: .
+    ports:
+      - "5000:80"
+    volumes:
+      - tooling_frontend:/var/www/html
